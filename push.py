@@ -31,9 +31,9 @@ class sim_gd(object):
         ]
         # perform SimGD update based on loss gradient
         for grad, param in zip(grad_list[0], [param for param in adversary.parameters()]):
-            param.data += grad * self.learning_rate
+            param.data -= grad * self.learning_rate
         for grad, param in zip(grad_list[1], [param for param in agent.parameters()]):
-            param.data += grad * self.learning_rate
+            param.data -= grad * self.learning_rate
 
 # actor / critic network model
 class ActorCritic(nn.Module):
@@ -194,7 +194,7 @@ if __name__ == "__main__":
             # create gamma tensor
             gamma_tensor = torch.vander(torch.tensor([gamma]), N=max_cycles, increasing=True).T
 
-            # compute gradient losses
+            # compute gradient losses per (16) in https://arxiv.org/pdf/2111.08565.pdf
             for agent_ in range(num_agents):
                 batch_gradient_losses[trajectory, agent_] = -torch.sum(rb_logprobs[trajectory, :, agent_].clone() * gamma_tensor * rb_advantages[trajectory, :, agent_].clone())
    
